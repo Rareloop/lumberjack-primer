@@ -1,8 +1,8 @@
 {
     "name": "rareloop/lumberjack-primer",
     "require": {
-        "rareloop/primer-core": "dev-ft-updated-deps@dev",
-        "rareloop/primer-template-engine-twig": "dev-ft-updated-deps@dev",
+        "rareloop/primer-core": "^2.0.2",
+        "rareloop/primer-template-engine-twig": "^3.0.0",
         "rareloop/lumberjack-core": "^3.0.0"
     },
     "require-dev": {
