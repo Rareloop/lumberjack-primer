@@ -1,0 +1,8 @@
+Currently a manual process:
+
+A few fixes have been done on local branches of primer and the twig template engine, these need to go into master before this will work.
+
+1. Add `rareloop/lumberjack-primer`
+2. Download twig templates and put views in `lumberjack/views/primer` and patterns in `lumberjack/views/patterns`
+3. Bring the primer JS/CSS/images files into a web servable location
+4. Add `views/patterns` to the `timber.paths` config file

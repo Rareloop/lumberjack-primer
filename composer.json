@@ -1,0 +1,27 @@
+{
+    "name": "rareloop/lumberjack-primer",
+    "require": {
+        "rareloop/primer-core": "dev-ft-updated-deps@dev",
+        "rareloop/primer-template-engine-twig": "dev-ft-updated-deps@dev",
+        "rareloop/lumberjack-core": "^3.0.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.0",
+        "satooshi/php-coveralls": "^1.0",
+        "mockery/mockery": "^1.0.0",
+        "brain/monkey": "^2.0.2",
+        "satooshi/php-coveralls": "^1.0",
+        "squizlabs/php_codesniffer": "^3.2",
+        "codedungeon/phpunit-result-printer": "^0.4.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Rareloop\\Lumberjack\\Primer\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Rareloop\\Lumberjack\\Primer\\Test\\": "tests"
+        }
+    }
+}
