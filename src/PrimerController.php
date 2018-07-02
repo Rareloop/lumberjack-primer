@@ -3,7 +3,7 @@
 namespace Rareloop\Lumberjack\Primer;
 
 use Rareloop\Lumberjack\Application;
-use Zend\Diactoros\Response\HTMLResponse;
+use Zend\Diactoros\Response\HtmlResponse;
 
 class PrimerController
 {
@@ -13,7 +13,7 @@ class PrimerController
 
         $patterns = $primer->getPatterns([$id], !isset($_GET['minimal']));
 
-        return new HTMLResponse($patterns);
+        return new HtmlResponse($patterns);
     }
 
     public function group(PrimerProxy $primer, $section, $group)
@@ -22,27 +22,27 @@ class PrimerController
 
         $patterns = $primer->getPatterns([$id], !isset($_GET['minimal']));
 
-        return new HTMLResponse($patterns);
+        return new HtmlResponse($patterns);
     }
 
     public function section(PrimerProxy $primer, $section)
     {
         $patterns = $primer->getPatterns([$section], !isset($_GET['minimal']));
 
-        return new HTMLResponse($patterns);
+        return new HtmlResponse($patterns);
     }
 
     public function template(PrimerProxy $primer, $template)
     {
         $template = $primer->getTemplate($template);
 
-        return new HTMLResponse($template);
+        return new HtmlResponse($template);
     }
 
     public function all(PrimerProxy $primer)
     {
         $template = $primer->getAllPatterns(!isset($_GET['minimal']));
 
-        return new HTMLResponse($template);
+        return new HtmlResponse($template);
     }
 }
