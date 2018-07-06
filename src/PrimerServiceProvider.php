@@ -2,15 +2,20 @@
 
 namespace Rareloop\Lumberjack\Primer;
 
+use Rareloop\Lumberjack\Config;
 use Rareloop\Lumberjack\Facades\Router;
 use Rareloop\Lumberjack\Primer\PrimerLoader;
 use Rareloop\Lumberjack\Providers\ServiceProvider;
-use Rareloop\Lumberjack\Config;
+use Rareloop\Primer\Commands\PatternMake;
 use Rareloop\Primer\Events\Event;
 use Zend\Diactoros\Response\RedirectResponse;
 
 class PrimerServiceProvider extends ServiceProvider
 {
+    protected $defaultCommands = [
+        PatternMake::class,
+    ];
+
     public function register()
     {
         $proxy = new PrimerProxy;
@@ -28,6 +33,22 @@ class PrimerServiceProvider extends ServiceProvider
         Event::listen('twig.init', function ($twig) {
             $twig->setCache(false);
         });
+
+        collect(array_merge($this->defaultCommands, $config->get('primer.commands', [])))->each(function ($class) {
+            $command = new $class;
+            $this->registerCommand($command);
+        });
+    }
+
+    protected function registerCommand($command)
+    {
+        // Don't use Hatchet::class syntax as the class may not exist
+        if ($this->app->has('Rareloop\Hatchet\Hatchet')) {
+            $hatchet = $this->app->get('Rareloop\Hatchet\Hatchet');
+
+            $command->setName('primer:'.$command->getName());
+            $hatchet->console()->add($command);
+        }
     }
 
     private function addDataToPrimerTemplateRenders($config)
