@@ -44,6 +44,13 @@ class PrimerServiceProvider extends ServiceProvider
     {
         // Don't use Hatchet::class syntax as the class may not exist
         if ($this->app->has('Rareloop\Hatchet\Hatchet')) {
+            if ($this->app->runningInConsole()) {
+                // Initialise Primer so the commands can use the static stuff.
+                // Might be better to initialise this by proxying all commands in the future?
+                $proxy = $this->app->get(PrimerProxy::class);
+                $proxy::instance();
+            }
+
             $hatchet = $this->app->get('Rareloop\Hatchet\Hatchet');
 
             $command->setName('primer:'.$command->getName());
