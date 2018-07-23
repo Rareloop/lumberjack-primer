@@ -11,17 +11,22 @@ use Rareloop\Primer\TemplateEngine\Twig\Template as TwigTemplateEngine;
  */
 class PrimerProxy
 {
-    protected $primer;
+    protected static $primer;
 
     public function __call($method, $arguments)
     {
-        return $this->primer()->$method(...$arguments);
+        return (static::primer())->$method(...$arguments);
     }
 
-    protected function primer() : Primer
+    public static function __callStatic($method, $arguments)
     {
-        if (!isset($this->primer)) {
-            $this->primer = Primer::start([
+        return (static::primer())::$method(...$arguments);
+    }
+
+    protected static function primer() : Primer
+    {
+        if (!isset(static::$primer)) {
+            static::$primer = Primer::start([
                 'basePath' => get_stylesheet_directory().'/views',
                 'viewPath' => get_stylesheet_directory().'/views/primer',
                 'templateClass' => TwigTemplateEngine::class,
@@ -29,6 +34,6 @@ class PrimerProxy
             ]);
         }
 
-        return $this->primer;
+        return static::$primer;
     }
 }
