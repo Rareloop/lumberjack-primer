@@ -2,7 +2,7 @@
     "name": "rareloop/lumberjack-primer",
     "require": {
         "rareloop/primer-core": "^2.0.2",
-        "rareloop/primer-template-engine-twig": "^3.0.0",
+        "rareloop/primer-template-engine-twig": "^4.0.0",
         "rareloop/lumberjack-core": "^3.0.0"
     },
     "require-dev": {

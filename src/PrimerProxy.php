@@ -2,8 +2,8 @@
 
 namespace Rareloop\Lumberjack\Primer;
 
+use Rareloop\Lumberjack\Primer\TwigPrimerTemplateEngine;
 use Rareloop\Primer\Primer;
-use Rareloop\Primer\TemplateEngine\Twig\Template as TwigTemplateEngine;
 
 /**
  * A proxy class to delay the instantiation of Primer so that other Service Providers get
@@ -29,7 +29,7 @@ class PrimerProxy
             static::$primer = Primer::start([
                 'basePath' => get_stylesheet_directory().'/views',
                 'viewPath' => get_stylesheet_directory().'/views/primer',
-                'templateClass' => TwigTemplateEngine::class,
+                'templateClass' => TwigPrimerTemplateEngine::class,
                 'wrapTemplate' => false,
             ]);
         }
