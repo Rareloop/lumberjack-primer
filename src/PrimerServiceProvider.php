@@ -2,99 +2,148 @@
 
 namespace Rareloop\Lumberjack\Primer;
 
+use Gajus\Dindent\Indenter;
 use Rareloop\Lumberjack\Config;
 use Rareloop\Lumberjack\Facades\Router;
-use Rareloop\Lumberjack\Primer\PrimerLoader;
+use Rareloop\Lumberjack\Primer\DocumentProvider;
+use Rareloop\Lumberjack\Primer\DocumentProviderManager;
+use Rareloop\Lumberjack\Primer\PatternProvider;
+use Rareloop\Lumberjack\Primer\PatternProviderManager;
+use Rareloop\Lumberjack\Primer\TemplateProviderManager;
 use Rareloop\Lumberjack\Providers\ServiceProvider;
-use Rareloop\Primer\Commands\PatternMake;
-use Rareloop\Primer\Events\Event;
-use Zend\Diactoros\Response\RedirectResponse;
+use Rareloop\Primer\Primer;
+use Rareloop\Primer\Twig\PrimerLoader;
+use Rareloop\Primer\Twig\TwigTemplateRenderer;
+use Timber\Loader;
+use Twig\Loader\ChainLoader;
+use Twig\TwigFilter;
 
 class PrimerServiceProvider extends ServiceProvider
 {
-    protected $defaultCommands = [
-        PatternMake::class,
-    ];
-
     public function register()
     {
-        $proxy = new PrimerProxy;
+        $this->registerPatternProvider();
+        $this->registerTemplateProvider();
+        $this->registerDocumentProvider();
 
-        $this->app->bind(PrimerProxy::class, $proxy);
-        $this->app->bind('primer', $proxy);
+        $this->registerPrimer();
     }
 
     public function boot(Config $config)
     {
-        $this->addPrimerRoutes();
-        $this->addPrimerLoaderToTimber();
-        $this->addDataToPrimerTemplateRenders($config);
+        $this->addLoadersToTwig();
 
-        Event::listen('twig.init', function ($twig) {
-            $twig->setCache(false);
-        });
-
-        collect(array_merge($this->defaultCommands, $config->get('primer.commands', [])))->each(function ($class) {
-            $command = new $class;
-            $this->registerCommand($command);
-        });
-    }
-
-    protected function registerCommand($command)
-    {
-        // Don't use Hatchet::class syntax as the class may not exist
-        if ($this->app->has('Rareloop\Hatchet\Hatchet')) {
-            if ($this->app->runningInConsole()) {
-                // Initialise Primer so the commands can use the static stuff.
-                // Might be better to initialise this by proxying all commands in the future?
-                $proxy = $this->app->get(PrimerProxy::class);
-                $proxy::instance();
-            }
-
-            $hatchet = $this->app->get('Rareloop\Hatchet\Hatchet');
-
-            $command->setName('primer:'.$command->getName());
-            $hatchet->console()->add($command);
+        if (!$this->isEnabled()) {
+            return;
         }
+
+        $this->addRoutes($config->get('primer.routes.prefix', 'primer'));
+        $this->addTwigFilters();
     }
 
-    private function addDataToPrimerTemplateRenders($config)
+    protected function isEnabled()
     {
-        Event::listen('render', function ($data) use ($config) {
-            $data->primer->environment = $config->get('app.environment');
-            $data->primer->themeBaseUrl = get_stylesheet_directory_uri();
+        return true;
+    }
+
+    protected function registerPatternProvider()
+    {
+        $this->app->bind('primer.patternProvider', new PatternProvider($this->app->get(PatternProviderManager::class)));
+    }
+
+    protected function registerTemplateProvider()
+    {
+        $this->app->bind('primer.templateProvider', new PatternProvider($this->app->get(TemplateProviderManager::class)));
+    }
+
+    protected function registerDocumentProvider()
+    {
+        $this->app->bind('primer.documentProvider', new DocumentProvider($this->app->get(DocumentProviderManager::class)));
+    }
+
+    protected function registerPrimer()
+    {
+        // Build the Primer instance only when it is required
+        $this->app->singleton(Primer::class, function (Config $config) {
+            // This is a bit gross but it's how Timber does it :(
+            $dummyLoader = new Loader();
+            $twig = $dummyLoader->get_twig();
+
+            $primer = new Primer(
+                new TwigTemplateRenderer($twig),
+                $this->app->get('primer.patternProvider'),
+                $this->app->get('primer.templateProvider'),
+                $this->app->get('primer.documentProvider')
+            );
+
+            $primer->setCustomData('routePrefix', $config->get('primer.routes.prefix', 'primer'));
+
+            return $primer;
+        });
+
+        // Also map the the `primer` keyword to the same singleton
+        $this->app->bind('primer', function () {
+            return $this->app->get(Primer::class);
         });
     }
 
-    private function addPrimerLoaderToTimber()
+    protected function addTwigFilters()
+    {
+        add_filter('timber/twig', function ($twig) {
+            /**
+             * Add a filter to ensure we get sane HTML layout out
+             */
+            $twig->addFilter(new TwigFilter('dindent', function ($html) {
+                $indenter = new Indenter();
+                return $indenter->indent($html);
+            }));
+
+            return $twig;
+        });
+    }
+
+    protected function addRoutes($prefix = 'primer')
+    {
+        Router::group($prefix, function ($group) {
+            /**
+             * Handle Patterns
+             */
+            $group
+                ->get('patterns/{id}{state?}', 'Rareloop\Lumberjack\Primer\Controllers\PatternsController@show')
+                ->where(['id' => '[\w\-\/]+', 'state' => '~[\w\-]+'])
+                ->name('primer.patterns');
+
+            /**
+             * Handle Templates
+             */
+            $group
+                ->get('templates/{id}{state?}', 'Rareloop\Lumberjack\Primer\Controllers\TemplatesController@show')
+                ->where(['id' => '[\w\-\/]+', 'state' => '~[\w\-]+'])
+                ->name('primer.templates');
+
+            /**
+             * Handle Documentation
+             */
+            $group
+                ->get('docs/{id}', 'Rareloop\Lumberjack\Primer\Controllers\DocsController@show')
+                ->where('id', '[\w\-\/]+')
+                ->name('primer.documents');
+
+            /**
+             * Handle root
+             */
+            $group->get('/', 'Rareloop\Lumberjack\Primer\Controllers\RootController@show');
+        });
+    }
+
+    protected function addLoadersToTwig()
     {
         add_filter('timber/loader/loader', function ($loader) {
-            $loader2 = new PrimerLoader(get_stylesheet_directory() . '/views/patterns');
-
-            $chainLoader = new \Twig_Loader_Chain([$loader, $loader2]);
-
-            return $chainLoader;
-        });
-    }
-
-    private function addPrimerRoutes()
-    {
-        // This is a bit more verbose that we have to be in Primer normal as the routing doesn't
-        // have a 'catch all' type language. Which I think is a good thing generally, but not how
-        // Primer has been built - doh!
-        Router::group('primer', function ($group) {
-            $group->get('/', 'Rareloop\Lumberjack\Primer\PrimerController@all')->name('primer.all');
-            $group->get('patterns', function () {
-                return new RedirectResponse(Router::url('primer.all'));
-            });
-
-            // Patterns
-            $group->get('patterns/{section}/{group}/{pattern}', 'Rareloop\Lumberjack\Primer\PrimerController@pattern');
-            $group->get('patterns/{section}/{group}', 'Rareloop\Lumberjack\Primer\PrimerController@group');
-            $group->get('patterns/{section}', 'Rareloop\Lumberjack\Primer\PrimerController@section');
-
-            // Templates
-            $group->get('templates/{template}', 'Rareloop\Lumberjack\Primer\PrimerController@template');
+            return new ChainLoader([
+                $loader,
+                new PrimerLoader($this->app->get('primer.templateProvider')),
+                new PrimerLoader($this->app->get('primer.patternProvider')),
+            ]);
         });
     }
 }

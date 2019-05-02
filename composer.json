@@ -1,9 +1,9 @@
 {
     "name": "rareloop/lumberjack-primer",
     "require": {
-        "rareloop/primer-core": "^2.0.2",
-        "rareloop/primer-template-engine-twig": "^4.0.0",
-        "rareloop/lumberjack-core": "^3.0.0 || ^4.0.0"
+        "rareloop/primer-core": "dev-dev@dev",
+        "rareloop/lumberjack-core": "^4.0.0",
+        "gajus/dindent": "^2.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^6.0",
