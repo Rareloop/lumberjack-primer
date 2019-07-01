@@ -133,6 +133,15 @@ class PrimerServiceProvider extends ServiceProvider
              * Handle root
              */
             $group->get('/', 'Rareloop\Lumberjack\Primer\Controllers\RootController@show');
+
+            /**
+             * Handle Frontend Assets
+             */
+            $group->group('assets', function ($assetsGroup) {
+                $assetsGroup->get('css/{file}', 'Rareloop\Lumberjack\Primer\Controllers\AssetsController@stylesheet')->where('file', '.+')->name('primer.assets.css');
+                $assetsGroup->get('js/{file}', 'Rareloop\Lumberjack\Primer\Controllers\AssetsController@javascript')->where('file', '.+')->name('primer.assets.js');
+                $assetsGroup->get('img/{file}', 'Rareloop\Lumberjack\Primer\Controllers\AssetsController@image')->where('file', '.+')->name('primer.assets.image');
+            });
         });
     }
 
