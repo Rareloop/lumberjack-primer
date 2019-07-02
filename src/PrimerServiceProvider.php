@@ -2,6 +2,7 @@
 
 namespace Rareloop\Lumberjack\Primer;
 
+use ComposerLocator;
 use Gajus\Dindent\Indenter;
 use Rareloop\Lumberjack\Config;
 use Rareloop\Lumberjack\Facades\Router;
@@ -16,6 +17,7 @@ use Rareloop\Primer\Twig\PrimerLoader;
 use Rareloop\Primer\Twig\TwigTemplateRenderer;
 use Timber\Loader;
 use Twig\Loader\ChainLoader;
+use Twig\Loader\FilesystemLoader;
 use Twig\TwigFilter;
 
 class PrimerServiceProvider extends ServiceProvider
@@ -152,6 +154,9 @@ class PrimerServiceProvider extends ServiceProvider
                 $loader,
                 new PrimerLoader($this->app->get('primer.templateProvider')),
                 new PrimerLoader($this->app->get('primer.patternProvider')),
+
+                // Enable views to be loaded from the Frontend package too
+                new FilesystemLoader([ComposerLocator::getPath('rareloop/primer-frontend') . '/twig/views']),
             ]);
         });
     }
