@@ -78,7 +78,7 @@ class PrimerServiceProvider extends ServiceProvider
                 $this->app->get('primer.documentProvider')
             );
 
-            $primer->setCustomData('routePrefix', $config->get('primer.routes.prefix', 'primer'));
+            $primer->setCustomData('basePath', $this->getBasePathFromWPConfig($config));
 
             return $primer;
         });
@@ -87,6 +87,25 @@ class PrimerServiceProvider extends ServiceProvider
         $this->app->bind('primer', function () {
             return $this->app->get(Primer::class);
         });
+    }
+
+    private function getBasePathFromWPConfig(Config $config)
+    {
+        // Infer the base path from the site's URL
+        $siteUrl = get_bloginfo('url');
+        $siteUrlParts = explode('/', rtrim($siteUrl, ' //'));
+        $siteUrlParts = array_slice($siteUrlParts, 3);
+        $basePath = implode('/', $siteUrlParts);
+
+        if (!$basePath) {
+            $basePath = '';
+        } else {
+            $basePath = '/' . $basePath;
+        }
+
+        $basePath = $basePath . '/' . $config->get('primer.routes.prefix', 'primer');
+
+        return $basePath;
     }
 
     protected function addTwigFilters()
