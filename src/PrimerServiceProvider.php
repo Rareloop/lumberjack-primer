@@ -79,6 +79,8 @@ class PrimerServiceProvider extends ServiceProvider
             );
 
             $primer->setCustomData('basePath', $this->getBasePathFromWPConfig($config));
+            $primer->setCustomData('cssUrl', rtrim(Router::url('primer.assets.css', ['file' => 'primer.min.css']), '/'));
+            $primer->setCustomData('jsUrl', rtrim(Router::url('primer.assets.js', ['file' => 'primer.min.js']), '/'));
 
             return $primer;
         });
