@@ -1,8 +1,8 @@
 {
     "name": "rareloop/lumberjack-primer",
     "require": {
-        "rareloop/primer-core": "dev-dev@dev",
-        "rareloop/primer-frontend": "dev-master@dev",
+        "rareloop/primer-core": "^v3.0.0",
+        "rareloop/primer-frontend": "v1.0.0",
         "rareloop/lumberjack-core": "^4.0.0",
         "gajus/dindent": "^2.0",
         "mindplay/composer-locator": "^2"
