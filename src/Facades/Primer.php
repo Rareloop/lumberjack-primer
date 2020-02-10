@@ -22,4 +22,15 @@ class Primer extends AbstractFacade
 
         return Primer::getPatternStateData($currentPatternId, $state);
     }
+
+    public static function currentTemplateStateData($state = 'default')
+    {
+        $currentTemplateId = Primer::currentTemplateId();
+
+        if (Primer::currentTemplateState() === 'default') {
+            throw new LogicException('Cannot use "Primer::currentTemplateStateData()" when rendering the default state as it will lead to an infinite loop.');
+        }
+
+        return Primer::getTemplateStateData($currentTemplateId, $state);
+    }
 }
