@@ -50,17 +50,23 @@ class PrimerServiceProvider extends ServiceProvider
 
     protected function registerPatternProvider()
     {
-        $this->app->bind('primer.patternProvider', new PatternProvider($this->app->get(PatternProviderManager::class)));
+        $manager = new PatternProviderManager($this->app);
+        $this->app->bind(PatternProviderManager::class, $manager);
+        $this->app->bind('primer.patternProvider', new PatternProvider($manager));
     }
 
     protected function registerTemplateProvider()
     {
-        $this->app->bind('primer.templateProvider', new PatternProvider($this->app->get(TemplateProviderManager::class)));
+        $manager = new TemplateProviderManager($this->app);
+        $this->app->bind(TemplateProviderManager::class, $manager);
+        $this->app->bind('primer.templateProvider', new PatternProvider($manager));
     }
 
     protected function registerDocumentProvider()
     {
-        $this->app->bind('primer.documentProvider', new DocumentProvider($this->app->get(DocumentProviderManager::class)));
+        $manager = new DocumentProviderManager($this->app);
+        $this->app->bind(DocumentProviderManager::class, $manager);
+        $this->app->bind('primer.documentProvider', new DocumentProvider($manager));
     }
 
     protected function registerPrimer()
