@@ -4,6 +4,7 @@ namespace Rareloop\Lumberjack\Primer;
 
 use ComposerLocator;
 use Gajus\Dindent\Indenter;
+use Stringy\StaticStringy;
 use Rareloop\Lumberjack\Config;
 use Rareloop\Lumberjack\Facades\Router;
 use Rareloop\Lumberjack\Primer\DocumentProvider;
@@ -33,6 +34,9 @@ class PrimerServiceProvider extends ServiceProvider
 
     public function boot(Config $config)
     {
+        // This might need to be configurable in the future
+        $this->registerCustomAutoloader('Patterns', get_template_directory() . '/resources/patterns');
+
         $this->addLoadersToTwig();
 
         if (!$this->isEnabled()) {
@@ -41,6 +45,41 @@ class PrimerServiceProvider extends ServiceProvider
 
         $this->addRoutes($config->get('primer.routes.prefix', 'primer'));
         $this->addTwigFilters();
+    }
+
+    protected function registerCustomAutoloader($prefix, $baseDir)
+    {
+        spl_autoload_register(function ($class) use ($prefix, $baseDir) {
+            // does the class use the namespace prefix?
+            $len = strlen($prefix);
+
+            if (strncmp($prefix, $class, $len) !== 0) {
+                // no, move to the next registered autoloader
+                return;
+            }
+
+            // get the relative class name
+            $relativeClass = substr($class, $len);
+
+            // Primer folders by convention are lowercase with dashes between words so we need to map
+            // the requested class to this folder structure
+            $parts = explode('\\', $relativeClass);
+
+            $className = array_pop($parts);
+            $relativePath = implode('\\', $parts);
+
+            $relativeClass = StaticStringy::dasherize($relativePath) . '\\' . $className;
+
+            // replace the namespace prefix with the base directory, replace namespace
+            // separators with directory separators in the relative class name, append
+            // with .php
+            $file = $baseDir . str_replace('\\', '/', $relativeClass) . '.php';
+
+            // if the file exists, require it
+            if (file_exists($file)) {
+                require $file;
+            }
+        });
     }
 
     protected function isEnabled()
@@ -87,9 +126,9 @@ class PrimerServiceProvider extends ServiceProvider
             $primer->setCustomData('basePath', $this->getBasePathFromWPConfig($config));
             $primer->setCustomData('cssUrl', rtrim(Router::url('primer.assets.css', ['file' => 'primer.min.css']), '/'));
             $primer->setCustomData('jsUrl', rtrim(Router::url('primer.assets.js', ['file' => 'primer.min.js']), '/'));
-            
+
             do_action('primer/init', $primer);
-            
+
             return $primer;
         });
 

@@ -5,7 +5,8 @@
         "rareloop/primer-frontend": "v1.0.0",
         "rareloop/lumberjack-core": "^4.0.0",
         "gajus/dindent": "^2.0",
-        "mindplay/composer-locator": "^2"
+        "mindplay/composer-locator": "^2",
+        "danielstjules/stringy": "~3.1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^6.0",
