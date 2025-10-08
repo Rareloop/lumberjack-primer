@@ -3,10 +3,9 @@
 namespace Rareloop\Lumberjack\Primer\Controllers;
 
 use Rareloop\Lumberjack\Http\Router;
-use Rareloop\Primer\Exceptions\PatternNotFoundException;
 use Rareloop\Primer\Primer;
-use Zend\Diactoros\Response\RedirectResponse;
-use Zend\Diactoros\Response\TextResponse;
+use Laminas\Diactoros\Response\RedirectResponse;
+use Laminas\Diactoros\Response\TextResponse;
 
 class RootController
 {

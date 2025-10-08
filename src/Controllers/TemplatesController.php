@@ -4,7 +4,7 @@ namespace Rareloop\Lumberjack\Primer\Controllers;
 
 use Rareloop\Primer\Exceptions\PatternNotFoundException;
 use Rareloop\Primer\Primer;
-use Zend\Diactoros\Response\TextResponse;
+use Laminas\Diactoros\Response\TextResponse;
 
 class TemplatesController
 {
