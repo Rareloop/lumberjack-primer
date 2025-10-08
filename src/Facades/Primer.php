@@ -3,7 +3,7 @@
 namespace Rareloop\Lumberjack\Primer\Facades;
 
 use LogicException;
-use Blast\Facades\AbstractFacade;
+use Rareloop\Lumberjack\Facades\AbstractFacade;
 
 class Primer extends AbstractFacade
 {

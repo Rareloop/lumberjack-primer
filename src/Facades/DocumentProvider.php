@@ -2,7 +2,7 @@
 
 namespace Rareloop\Lumberjack\Primer\Facades;
 
-use Blast\Facades\AbstractFacade;
+use Rareloop\Lumberjack\Facades\AbstractFacade;
 
 class DocumentProvider extends AbstractFacade
 {
