@@ -6,7 +6,7 @@ use App\Responses\Error404Response;
 use ComposerLocator;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
-use Zend\Diactoros\Response;
+use Laminas\Diactoros\Response;
 
 class AssetsController
 {
@@ -25,7 +25,7 @@ class AssetsController
         return $this->createResponse('img/' . $file);
     }
 
-    protected function createResponse($file, $mimeType = null) : ResponseInterface
+    protected function createResponse($file, $mimeType = null): ResponseInterface
     {
         try {
             $stream = $this->getFileStream($file);
