@@ -3,7 +3,7 @@
 namespace Rareloop\Lumberjack\Primer\Controllers;
 
 use App\Responses\Error404Response;
-use ComposerLocator;
+use Composer\InstalledVersions;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Laminas\Diactoros\Response;
@@ -62,7 +62,9 @@ class AssetsController
 
     protected function getFilePath($file)
     {
-        $path = ComposerLocator::getPath("rareloop/primer-frontend");
+        $installPath = InstalledVersions::getInstallPath('rareloop/primer-frontend');
+        $path = realpath($installPath) ?: $installPath;
+
         return $path . '/frontend/dist/' . $file;
     }
 }
