@@ -7,7 +7,6 @@ use Composer\InstalledVersions;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Laminas\Diactoros\Response;
-use RuntimeException;
 
 class AssetsController
 {
@@ -64,11 +63,6 @@ class AssetsController
     protected function getFilePath($file)
     {
         $installPath = InstalledVersions::getInstallPath('rareloop/primer-frontend');
-
-        if ($installPath === null) {
-            throw new RuntimeException('Package "rareloop/primer-frontend" is not installed.');
-        }
-
         $path = realpath($installPath) ?: $installPath;
 
         return $path . '/frontend/dist/' . $file;
