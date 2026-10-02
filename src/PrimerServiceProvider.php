@@ -2,7 +2,7 @@
 
 namespace Rareloop\Lumberjack\Primer;
 
-use ComposerLocator;
+use Composer\InstalledVersions;
 use Gajus\Dindent\Indenter;
 use Stringy\StaticStringy;
 use Rareloop\Lumberjack\Config;
@@ -218,13 +218,16 @@ class PrimerServiceProvider extends ServiceProvider
     protected function addLoadersToTwig()
     {
         add_filter('timber/loader/loader', function ($loader) {
+            $frontendPath = InstalledVersions::getInstallPath('rareloop/primer-frontend');
+            $resolvedPath = realpath($frontendPath) ?: $frontendPath;
+
             return new ChainLoader([
                 $loader,
                 new PrimerLoader($this->app->get('primer.templateProvider')),
                 new PrimerLoader($this->app->get('primer.patternProvider')),
 
                 // Enable views to be loaded from the Frontend package too
-                new FilesystemLoader([ComposerLocator::getPath('rareloop/primer-frontend') . '/twig/views']),
+                new FilesystemLoader([$resolvedPath . '/twig/views']),
             ]);
         });
     }
